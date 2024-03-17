@@ -68,6 +68,8 @@ const CreateToDo : FC = () => {
       id: randomId(),
       isCompleted: false,
     } as ToDoItemType)
+    setDate('');
+    setText('');
   }
 
   return (
