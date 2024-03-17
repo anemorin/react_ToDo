@@ -2,6 +2,8 @@ import { FC } from "react"
 import { ToDoItemType } from "../types"
 import ToDoItem from "./ToDoItem"
 import styled from "styled-components"
+import UseStores from "../hooks/useStores"
+import { observer } from "mobx-react"
 
 type Props = {
   title: string;
@@ -20,7 +22,7 @@ const Title = styled.div`
 const ComponentLayout = styled.div`
   display: flex;
   flex-direction: column;
-  width: 70%;
+  min-width: 70%;
   gap: 12px;
 `
 
@@ -36,6 +38,7 @@ const Button = styled.button`
 `
 
 const ToDoList: FC<Props> = ({items, title, onClearAll}) => {
+  const { toDoStore } = UseStores();
   return (
     <ComponentLayout>
       <Title>
@@ -53,9 +56,9 @@ const ToDoList: FC<Props> = ({items, title, onClearAll}) => {
               key={toDo.id}
               time={toDo.time}
               text={toDo.text}
-              onComplete={toDo.onComplete}
-              onDelete={toDo.onDelete}
-              id={""}
+              onComplete={() => toDoStore.completeItem(toDo.id)}
+              onDelete={() => toDoStore.deleteItem(toDo.id)}
+              id={toDo.id}
             />
           )
         }
@@ -64,4 +67,5 @@ const ToDoList: FC<Props> = ({items, title, onClearAll}) => {
   )
 }
 
-export default ToDoList;
+ToDoList.displayName = "ToDoList";
+export default observer(ToDoList);

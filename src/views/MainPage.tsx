@@ -1,36 +1,50 @@
-import { FC } from "react";
-import { ToDoItemType } from "../types";
+import { FC, useMemo } from "react";
 import ToDoList from "../components/ToDoList";
 import styled from "styled-components";
 import CreateToDo from "../components/CreateToDo";
+import UseStores from "../hooks/useStores";
+import { observer } from "mobx-react";
 
 const PageLayout = styled.div`
   display: flex;
   padding: 24px 36px;
   gap: 24px;
+  justify-content: space-between;
+`
+
+const ListsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `
 
 const MainPage : FC = () => {
-  const toDos : Array<ToDoItemType> = [
-    {
-      time: new Date('2021-01-01'),
-      id: '1',
-      text: 'Learn React',
-      onComplete: () => {console.warn(1)},
-      onDelete: () => {console.warn(2)},
-    }
-  ];
+  const { toDoStore } = UseStores();
+
+  const Lists = useMemo(() => (
+    <>
+      <ToDoList
+        items={toDoStore.incompleteToDos}
+        title="Незавершенные задачи"
+        onClearAll={() => toDoStore.clearUnCompletedItems()}
+      />
+      <ToDoList
+        items={toDoStore.completedToDos}
+        title="Завершенные задачи"
+        onClearAll={() => toDoStore.clearCompletedItems()}
+      />
+    </>
+  ), [toDoStore.toDos]);
 
   return (
     <PageLayout>
-      <ToDoList
-        items={toDos}
-        title="Незавершенные задачи"
-        onClearAll={() => {console.warn(3)}}
-      />
+      <ListsContainer>
+        {Lists}
+      </ListsContainer>
       <CreateToDo />
     </PageLayout>
   )
 }
 
-export default MainPage;
+MainPage.displayName = 'MainPage';
+export default observer(MainPage);
