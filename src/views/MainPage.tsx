@@ -1,9 +1,10 @@
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import ToDoList from "../components/ToDoList";
 import styled from "styled-components";
 import CreateToDo from "../components/CreateToDo";
 import UseStores from "../hooks/useStores";
 import { observer } from "mobx-react";
+import { runInAction } from "mobx";
 
 const PageLayout = styled.div`
   display: flex;
@@ -35,6 +36,20 @@ const MainPage : FC = () => {
       />
     </>
   ), [toDoStore.toDos]);
+
+  useEffect(() => {
+    const items = localStorage.getItem('toDos');
+    if (items) {
+      const preparedData = JSON.parse(items);
+      runInAction(() => {
+        toDoStore.toDos = preparedData ?? [];
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('toDos', JSON.stringify(toDoStore.toDos));
+  }, [toDoStore.toDos]);
 
   return (
     <PageLayout>
