@@ -1,29 +1,44 @@
-import dayjs from "dayjs";
 import { FC } from "react";
 import styled from "styled-components";
 import { icons } from "../enums";
-import { ToDoItemType } from "../types";
+
+type Props = {
+  id: string;
+  time: string;
+  text: string;
+  onComplete: () => void;
+  onDelete: () => void;
+}
 
 const ToDoContainer = styled.div`
-  height: 10%;
+  min-height: 36px;
   min-height: 24px;
   border: 1px solid black;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px;
+  max-width: 100%;
 `
 
 const ToDoLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
 `
 
 const ToDoRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`
+
+const ToDoText = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 80%;
+  word-break: break-all;
+  text-overflow: ellipsis;
 `
 
 const Button = styled.button`
@@ -37,14 +52,14 @@ const Button = styled.button`
   cursor: pointer;
 `
 
-const ToDoItem : FC<ToDoItemType> = ({
-  time, text, onDelete, onComplete
+const ToDoItem : FC<Props> = ({
+  time, text, onDelete, onComplete,
 }) => {
   return (
     <ToDoContainer>
       <ToDoLeft>
-        <div>{dayjs(time).format("HH:mm")}</div>
-        <div>{text}</div>
+        <div>{time}</div>
+        <ToDoText>{text}</ToDoText>
       </ToDoLeft>
       <ToDoRight>
         <Button
@@ -62,4 +77,5 @@ const ToDoItem : FC<ToDoItemType> = ({
   )
 }
 
+ToDoItem.displayName = "ToDoItem";
 export default ToDoItem;

@@ -1,7 +1,9 @@
-import { FC } from "react";
-import styled from "styled-components";
+import { createRef, FC, useState } from "react";
+import { ToDoItemType, WithValidation } from "../types";
 import Input from "./Input";
-import React from "react";
+import styled from "styled-components";
+import { useDispatch } from "react-redux";
+import { createToDoItem } from "../store/toDoStore/ToDoReducer";
 
 const ComponentLayout = styled.div`
   display: flex;
@@ -12,6 +14,7 @@ const ComponentLayout = styled.div`
   justify-content: left;
   border: 1px solid black;
   padding: 24px 12px;
+  height: 40%;
 `;
 
 const Title = styled.p`
@@ -27,27 +30,92 @@ const CreateButton = styled.button`
 `;
 
 const CreateToDo : FC = () => {
-  const [date, setDate] = React.useState('');
-  const [text, setText] = React.useState('');
+  const refs = [
+    {
+      ref: createRef<WithValidation>(),
+      id: 'DateRef',
+    },
+    {
+      ref: createRef<WithValidation>(),
+      id: 'TextRef',
+    },
+  ]
+
+  const [ DateRef, TextRef ] = refs;
+
+  const dispatch = useDispatch();
+
+  const [date, setDate] = useState('');
+  const [dateError, setDateError] = useState<string | undefined>('');
+  const [text, setText] = useState('');
+  const [textError, setTextError] = useState<string | undefined>('');
+
+
+  const randomId = function(length = 6) {
+    return Math.random().toString(36).substring(2, length+2);
+  };
+
+  const validateErrors = () => {
+    const errors = [];
+    refs.map((ref) => {
+      const error = ref.ref.current!.validate();
+      if (error) {
+        switch(ref.id) {
+          case 'DateRef':
+            setDateError(error);
+            break;
+          default:
+            setTextError(error);
+            break;
+        }
+        errors.push(error);
+      }
+    })
+    return !!errors.length;
+  }
+
+  const createHandler = () => {
+    if (!validateErrors()) {
+      dispatch(
+        createToDoItem({
+          time: date,
+          text: text,
+          id: randomId(),
+          isCompleted: false,
+        } as ToDoItemType)
+      );
+      setDate('');
+      setText('');
+    }
+  }
+
   return (
     <ComponentLayout>
       <Title>Создать задачу</Title>
       <Input
         type="time"
         value={date}
-        onChange={setDate}
+        onChange={(value) => {
+          setDate(value);
+          setDateError(undefined);
+        }}
         title="Дата"
+        ref={DateRef.ref}
+        errorMessage={dateError}
       />
       <Input
         type="text"
         value={text}
-        onChange={setText}
+        onChange={(value) => {
+          setText(value);
+          setTextError(undefined);
+        }}
         title="Текст"
+        ref={TextRef.ref}
+        errorMessage={textError}
       />
       <CreateButton
-        onClick={() => {
-          console.log(date, text);
-        }}
+        onClick={() => createHandler()}
       >
         Создать
       </CreateButton>
