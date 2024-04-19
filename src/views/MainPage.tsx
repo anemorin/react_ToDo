@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { ToDoItemType } from "../types";
+import { FC, useMemo } from "react";
 import ToDoList from "../components/ToDoList";
 import styled from "styled-components";
 import CreateToDo from "../components/CreateToDo";
+import useToDoStore from "../store/ToDoStore";
 
 const PageLayout = styled.div`
   display: flex;
@@ -10,24 +10,52 @@ const PageLayout = styled.div`
   gap: 24px;
 `
 
+const ListsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`
+
+
 const MainPage : FC = () => {
-  const toDos : Array<ToDoItemType> = [
-    {
-      time: new Date('2021-01-01'),
-      id: '1',
-      text: 'Learn React',
-      onComplete: () => {console.warn(1)},
-      onDelete: () => {console.warn(2)},
-    }
-  ];
+  const { toDos, clearUnCompletedItems, clearCompletedItems } = useToDoStore();
+
+  const completedToDos = useMemo(() => toDos.filter((todo) => todo.isCompleted), [toDos]);
+  const incompleteToDos = useMemo(() => toDos.filter((todo) => !todo.isCompleted), [toDos]);
+
+  const Lists = useMemo(() => (
+    <>
+      <ToDoList
+        items={incompleteToDos}
+        title="Незавершенные задачи"
+        onClearAll={() => clearUnCompletedItems()}
+      />
+      <ToDoList
+        items={completedToDos}
+        title="Завершенные задачи"
+        onClearAll={() => clearCompletedItems()}
+      />
+    </>
+  ), [clearCompletedItems, clearUnCompletedItems, completedToDos, incompleteToDos]);
+
+  // useEffect(() => {
+  //   const items = localStorage.getItem('toDos');
+  //   if (items) {
+  //     const preparedData = JSON.parse(items);
+  //     dispatch(setToDoItems(preparedData));
+  //   }
+  // }, [])
+
+  // useEffect(() => {
+  //   localStorage.setItem('toDos', JSON.stringify(toDos));
+  // }, [toDos]);
+
 
   return (
     <PageLayout>
-      <ToDoList
-        items={toDos}
-        title="Незавершенные задачи"
-        onClearAll={() => {console.warn(3)}}
-      />
+      <ListsContainer>
+        {Lists}
+      </ListsContainer>
       <CreateToDo />
     </PageLayout>
   )

@@ -1,7 +1,10 @@
 export type ToDoItemType = {
   id: string;
-  time: Date;
+  time: string;
   text: string;
-  onDelete: () => void;
-  onComplete: () => void;
+  isCompleted: boolean;
+}
+
+export type WithValidation = {
+  validate(): string | undefined;
 }
