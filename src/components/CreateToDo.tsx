@@ -54,22 +54,36 @@ const CreateToDo : FC = () => {
     return Math.random().toString(36).substring(2, length+2);
   };
 
-  const CreateHandler = () => {
+  const validateErrors = () => {
+    const errors = [];
     refs.map((ref) => {
-      if (ref.id === 'DateRef') {
-        setDateError(ref.ref.current!.validate());
-      } else {
-        setTextError(ref.ref.current!.validate());
+      const error = ref.ref.current!.validate();
+      if (error) {
+        switch(ref.id) {
+          case 'DateRef':
+            setDateError(error);
+            break;
+          default:
+            setTextError(error);
+            break;
+        }
+        errors.push(error);
       }
     })
-    toDoStore.createToDoItem({
-      time: date,
-      text: text,
-      id: randomId(),
-      isCompleted: false,
-    } as ToDoItemType)
-    setDate('');
-    setText('');
+    return !!errors.length;
+  }
+
+  const createHandler = () => {
+    if (!validateErrors()) {
+      toDoStore.createToDoItem({
+        time: date,
+        text: text,
+        id: randomId(),
+        isCompleted: false,
+      } as ToDoItemType)
+      setDate('');
+      setText('');
+    }
   }
 
   return (
@@ -78,7 +92,10 @@ const CreateToDo : FC = () => {
       <Input
         type="time"
         value={date}
-        onChange={setDate}
+        onChange={(value) => {
+          setDate(value);
+          setDateError(undefined);
+        }}
         title="Дата"
         ref={DateRef.ref}
         errorMessage={dateError}
@@ -86,13 +103,16 @@ const CreateToDo : FC = () => {
       <Input
         type="text"
         value={text}
-        onChange={setText}
+        onChange={(value) => {
+          setText(value);
+          setTextError(undefined);
+        }}
         title="Текст"
         ref={TextRef.ref}
         errorMessage={textError}
       />
       <CreateButton
-        onClick={() => CreateHandler()}
+        onClick={() => createHandler()}
       >
         Создать
       </CreateButton>
